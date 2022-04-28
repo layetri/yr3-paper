@@ -2,3 +2,6 @@
 *.aux
 *.log
 *.synctex.gz
+*.dvi
+IEEEtran.cls
+

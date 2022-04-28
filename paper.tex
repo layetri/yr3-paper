@@ -1,4 +1,4 @@
-\documentclass[12pt, letterpaper]{article}
+\documentclass[12pt, IEEEtran]{article}
 \usepackage[utf8]{inputenc}
 \title{Granular synthesis in practice}
 \author{Daniël Kamp}
@@ -9,23 +9,70 @@
 \maketitle
 
 \begin{abstract}
-This is where the abstract goes.
+This writing aims to provide insight into various forms of granular synthesis. It lists existing implementations, explains the inner workings of such systems, and provides insight into human interfaces to use this technique.
 \end{abstract}
 
 \section*{Introduction}
+This is where I write the introduction.
 
 \section{What is granular synthesis?}
-\subsection{Forms of granular synthesis}
-here go forms
+This section provides a brief history of granular synthesis, explains the parts that make up a system implementing this technique, and lists some popular and influential instruments.
+
+\subsection{A brief history}
+In this subsection I give a brief overview of the history of this synthesis technique.
+
+\subsection{General system overview}
+In this section, I want to list the general parts that make up a granular synthesis system. [insert block diagram]
+\subsubsection{Sound source}
+Here I write about samples, chopping, et cetera.
+\subsubsection{Windowing and envelope}
+Here I write about windowing, talk about some problems, and provide different envelope shapes and formulas.
+\subsubsection{Various parameters}
+Here I list various parameters that might be implemented along a granular system.
+\begin{itemize}
+\item{Stereo panning}
+\item{Spread}
+\item{something}
+\end{itemize}
+
 \subsection{Existing instruments}
-here go instruments
+In this section, I list a number of instruments that I believe to be important in the world of granular synthesis.
+
+\subsubsection{Mutable Instruments Clouds}
+Here I describe MI Clouds.
+
+\subsubsection{Tasty Chips GR-1}
+Here I describe GR-1.
+
+\subsubsection{Output Portal}
+Here I describe Portal
+
+\subsubsection{Instruo Arbhar}
+Here I describe Arbhar
+
+\subsubsection{Waldorf Quantum/Iridium}
+Here I describe Quantum
+
 
 \section{How does granular synthesis work?}
+In this section I dive deeper into the inner workings of a granular system. I'll provide a schematic overview of some common implementations, and explain them further.
+
 \subsection{Implementations}
+This subsection lists different implementations.
+
 \subsection{Efficiency}
+This subsection looks at variables that impact system performance, and how manufacturers handle those.
 
 \section{How is granular synthesis used?}
+This section looks at the human aspect of granular synthesis: what sounds does it produce, how is it controlled, and how can one play an instrument that uses this technique.
+
 \subsection{Human control}
+This subsection looks at ways a human being can control a granular instrument. Common input methods like touch interfaces, sliders, knobs, and digital UIs are described and compared.
+
 \subsection{Playability}
+This subsection looks at how such instruments can be controlled in an artistic manner. It provides an insight into live performance methods and some useful macros (maybe).
+
+\section*{Conclusions}
+This section summarizes my findings from the research, and gives a careful recommendation on implementing such system based on these results.
 
 \end{document}
