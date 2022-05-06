@@ -8,3 +8,8 @@ IEEEtran.cls
 paper.fdb_latexmk
 paper.fls
 GranularDiagram.afdesign
+paper.bbl
+paper.bcf
+paper.blg
+paper.run.xml
+research/
