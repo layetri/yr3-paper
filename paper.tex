@@ -6,7 +6,7 @@
 \usepackage[style=apa, backend=biber]{biblatex}
 \addbibresource{paper.bib}
 
-\title{Granular synthesis for instrument makers}
+\title{Granular Synthesis for Instrument Makers}
 \author{	
 	\IEEEauthorblockN{Daniël Kamp\\}
     \IEEEauthorblockA{HKU University of the Arts Utrecht
@@ -32,13 +32,6 @@ This first part tells a brief history of granular synthesis, explains the compon
 \subsection{A brief history}
 Granular synthesis as it's known today is a form of digital sound synthesis, which is based on the processing of small slices of sampled audio known as "grains". The underlying view on sound perception was first proposed by Hungarian-British physicist Dennis Gabor in an article titled \textit{Acoustical Quanta and the Theory of Hearing} (\cite{gabor47}). In this writing, Gabor theorized an approach to sound similar to concepts found in quantum mechanics.\\ Building on this theory, in the late 1950s, Greek composer Iannis Xenakis started experimenting with the technique, stitching together many tiny slices of tape to create new sounds (\cite{robindore96}). Inspired by Xenakis during a 1972 workshop taught by the former, composer Curtis Roads eventually created the first computer software implementing this synthesis paradigm in 1974 (\cite{opie03}). His code produced a 30-second long piece titled Klang-1, using three parameters: envelope, duration, and density. This software, however, did not operate in real-time, and producing this piece of music took multiple days. The first real-time implementation of the principle came from Canadian composer Barry Truax, who developed GSX (1986) and GSAMX (1987) (\cite{truax88}). \\
 Since then, granular synthesis has established itself as a pillar of modern digital sound generation. More approachable implementations of the technique, like Robert Henke's Granulator (2011), made it possible for anyone with a computer to explore its vast new possibilities in sound. Today, dozens of granular synthesizers are available, each offering a different approach to a 75-year-old concept.
-%since then numerous implementations: robert henke popular granulator, hardware instruments, etc, etc
-
-%\subsection{Terminology}
-%Througout this writing, it's expected that the reader has a basic knowledge of the workings of digital audio, and is familiar with the concept of sampling. For concepts beyond these basic principles, refer to the following list for an explanation of their meaning.
-%
-%\subsubsection*{Grain}
-%A small slice of sound, typically below X ms in length, used in a granular audio system.
 
 \subsection{General system overview}
 This section describes the general anatomy of a granular synthesizer, and gives a broad overview of the building blocks that make up such a system. 
@@ -60,35 +53,27 @@ A model that is used in modern digital granular synthesis is spray. This impleme
 
 \subsubsection{Windowing and envelope}
 Since the start position of grains is rather arbitrary, there is no telling what the amplitude of the first sample in the selection will be. Therefore, it's good practice, as it is in any digital audio application, to apply an envelope that trims off any rough edges that may exist in the source material. This envelope can be modified to a user's own insight through the parameters \textit{shape} and \textit{length}. \\
-The shape of an envelope refers to its mathematical function. In this regard, there are four commonly used shapes: linear, square root, exponential, and Gaussian. The latter was proposed by Dennis Gabor in his original theory on granular sound, and is still commonly used. More recently, due to developments in the field of processing power in computers over the past 50-or-so years, it has become possible and commonplace to use other envelope shapes as well. Figure 2 [INSERT FIGURE 2] shows the four functions as a plot of amplitude over time.
-Superseding their technical advantages, these envelopes have turned from makeshift solution to creative tool in the hands of resourceful artists. \\
+The shape of an envelope refers to its mathematical function. In this regard, there are four commonly used shapes: linear, square root, exponential, and Gaussian. The latter was proposed by Dennis Gabor in his original theory on granular sound, and is still commonly used. More recently, due to developments in the field of processing power in computers over the past fifty-or-so years, it has become possible and commonplace to use other envelope shapes as well. Figure 2 [INSERT FIGURE 2] shows the four functions as a plot of amplitude over time.
+Superseding their technical advantages, these envelopes have turned from makeshift solution to creative tool in the hands of resourceful artists.\\
 The length of an envelope simply describes the time it takes for the signal to reach its full amplitude. By varying this number, one can change the character of the resulting sound. If a long \textit{attack} (rising edge of the envelope) is used, the resulting audio will sound more mellow compared to when a short attack time is applied.
 
 \subsubsection{Duration and density}
 Density, as mentioned previously, describes the number of grains played in one (1) second. Variations in this domain can roughly be split into two categories: \textit{deterministic} and \textit{stochastic}.\\
-In a deterministic distribution, grains are played back with even spacing between them. This means that the resulting sound is of a regular nature.  \\
-
-Stochastic distribution, on the other hand, adds a realm of uncertainty to the sound.
+In a deterministic distribution, grains are played back with even spacing between them. This means that the resulting sound is of a regular nature. For example, this method would produce audio in which a grain is played every 100 ms. \\
+Stochastic distribution, on the other hand, adds a realm of uncertainty to the sound. When this distribution is applied, the beginning and length of each grain are randomized. This means that the resulting sound is no longer predictable and/or regular in nature. Using this method, one can create vast clouds of sound that contain no structure or repetition.
 
 \subsection{Existing instruments}
-This section lists a few instruments and effects that use granular synthesis. \\ Author's note: I selected open-source instruments of which the source code is freely available to the public. This way, I can give an in-depth comparison of the inner workings of these instruments. I'll use these and their concrete implementations as references throughout the rest of my research described in this writing.
+This section lists a few instruments and effects that use granular synthesis. \\
+\textit{Author's note:} I selected open-source instruments of which the source code is freely available to the public. This way, I can give an in-depth comparison of the inner workings of these instruments. I'll use these and their concrete implementations as references throughout the rest of my research described in this writing.
 
 \subsubsection{Mutable Instruments' Clouds}
-Clouds is a Eurorack module developed and produced by Émilie Gillet (Mutable Instruments). Both the hardware files (schematics, CAD-files) and firmware source code are open-source and publicly available.\\
-What?
-- Eurorack module
-- Open-source hardware and firmware
-- Granular effect with built-in sound source\\
-How?
-- Clouds triggers one grain at a time
-- Clouds uses a predetermined amount of grains (64 max)
-- Clouds uses Look Up Tables for almost everything (filter, windowing, etc)
-
-\subsubsection{Tasty Chips GR-1}
-Here I describe GR-1.
+Clouds is a Eurorack module developed and produced by Émilie Gillet (Mutable Instruments). Both the hardware files (schematics, CAD-files) and firmware source code are open-source and publicly available (\cite{clouds}).\\
+As its source sound, Clouds uses incoming stereo audio compliant with the Eurorack standard.\\
+Looking at the source files of Clouds, one can dissect the process used to "seed" grains. First, a maximum number of grains is "hard-coded" into the software. The program will create new ones until this limit is reached. Clouds offers both deterministic and stochastic seeding modes, which can be selected by the user. In deterministic mode, one controls the time between seeds in a regular manner. In stochastic mode, the user input controls the likelihood with which grains will be created.\\
+This implementation uses so-called Look Up Tables (LUTs) to store data for its envelopes and other resource-intensive processes. These tables contain pre-calculated numbers, so that the program doesn't need to calculate these in real-time. This makes it suitable for low-power devices (in case of Clouds, this is an STM32 micro-controller). The next chapter contains examples of, and a comparison between this implementation and one that does calculate its data in real-time.
 
 \subsubsection{Argotlunar}
-Argotlunar is a real-time granular VST and AudioUnit plugin created by Michael Ourednik. The source code of this software is open-source and available via GitHub.
+Argotlunar is a real-time granular VST and AudioUnit plugin created by Michael Ourednik. The source code of this software is open-source and available via GitHub (\cite{argotlunar}).
 
 
 \section{How does granular synthesis work?}
@@ -96,8 +81,10 @@ This part dives deeper into the inner workings of a granular system. Starting wi
 
 \subsection{Audiological concepts}
 Here I SHORTLY describe the audiological concepts that make this system possible. AKA: why do we perceive lots of small ticks as a coherent sound, and IMPORTANT: what criteria does our system need to fit in order to be deemed a successful granular synthesizer. This makes our hypothesis concrete and closed off.
+
 \subsection{Implementations}
 In this section, implementations and methods are proposed for specific parts of the system. The next section will take execution metrics from these example implementations, and validate them by the requirements defined previously.
+
 \subsubsection{Sound sourcing and selection}
 This part lists different methods of sound sourcing and sample selection:
 - Microphone or audio input

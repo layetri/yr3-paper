@@ -13,3 +13,6 @@ paper.bcf
 paper.blg
 paper.run.xml
 research/
+benchmark/_localrun
+benchmark/*/*.o
+.vscode/*
