@@ -3,32 +3,33 @@
 #include <iostream>
 
 #include "envelope.h"
+#include "scheduler.h"
 #include "benchmark.h"
 
-#define ROUNDS 10
+#define ROUNDS 1000
 
 using namespace std;
 
 int main() {
     Benchmark benchmark;
 
+    // Do Envelope benchmark
     for(int i = 0; i < ROUNDS; i++) {
         Envelope::preprocess(i, &benchmark);
 
-        cout << "ENV PRE - Round " << i << " complete" << endl;
-    }
-
-    for(int i = 0; i < ROUNDS; i++) {
         Envelope::lookup(i, &benchmark);
 
-        cout << "ENV LUT - Round " << i << " complete" << endl;
-    }
-
-    for(int i = 0; i < ROUNDS; i++) {
         Envelope::realtime(i, &benchmark);
-
-        cout << "ENV RT - Round " << i << " complete" << endl;
     }
+
+    // // Do Scheduler benchmark
+    // for(int i = 0; i < ROUNDS; i++) {
+    //     Scheduler::deterministic(i, &benchmark);
+    // }
+
+    // for(int i = 0; i < ROUNDS; i++) {
+    //     Scheduler::stochastic(i, &benchmark);
+    // }
 
     benchmark.print();
 

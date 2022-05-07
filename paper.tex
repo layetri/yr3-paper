@@ -2,7 +2,38 @@
 % Leaving this next line in to periodically check how many Normal People Pages were written
 %\documentclass[12pt, letterpaper]{article}
 \usepackage[utf8]{inputenc}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+	language=c++,
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
 \usepackage{graphicx}
+\usepackage{mathtools}
+
 \usepackage[style=apa, backend=biber]{biblatex}
 \addbibresource{paper.bib}
 
@@ -53,8 +84,14 @@ A model that is used in modern digital granular synthesis is spray. This impleme
 
 \subsubsection{Windowing and envelope}
 Since the start position of grains is rather arbitrary, there is no telling what the amplitude of the first sample in the selection will be. Therefore, it's good practice, as it is in any digital audio application, to apply an envelope that trims off any rough edges that may exist in the source material. This envelope can be modified to a user's own insight through the parameters \textit{shape} and \textit{length}. \\
-The shape of an envelope refers to its mathematical function. In this regard, there are four commonly used shapes: linear, square root, exponential, and Gaussian. The latter was proposed by Dennis Gabor in his original theory on granular sound, and is still commonly used. More recently, due to developments in the field of processing power in computers over the past fifty-or-so years, it has become possible and commonplace to use other envelope shapes as well. Figure 2 [INSERT FIGURE 2] shows the four functions as a plot of amplitude over time.
-Superseding their technical advantages, these envelopes have turned from makeshift solution to creative tool in the hands of resourceful artists.\\
+The shape of an envelope refers to its mathematical function. In this regard, there are four commonly used shapes: linear, square root, exponential, and Gaussian. The latter was proposed by Dennis Gabor in his original theory on granular sound, and is still commonly used. More recently, due to developments in the field of processing power in computers over the past fifty-or-so years, it has become possible and commonplace to use other envelope shapes as well. Figure \ref{fig:env_shapes} shows the four functions as a plot of amplitude over time.
+
+\begin{figure}[ht!]
+	\includegraphics[width=\linewidth]{env_shapes.png}
+	\caption{Four envelope shapes.}
+	\label{fig:env_shapes}
+\end{figure}
+
 The length of an envelope simply describes the time it takes for the signal to reach its full amplitude. By varying this number, one can change the character of the resulting sound. If a long \textit{attack} (rising edge of the envelope) is used, the resulting audio will sound more mellow compared to when a short attack time is applied.
 
 \subsubsection{Duration and density}
@@ -93,13 +130,136 @@ For sample selection:
 - Randomized selection
 - Transient selection
 \subsubsection{Trigger algorithms}
-Here I write about different trigger algorithms: when does a grain get triggered, what conditions exist, and how can this be controlled in a musical manner?
+This section gives three examples of grain trigger algorithms, using two different approaches. These algorithms determine when grains are played, and thus heavily influence the character of the resulting sound.\\
+
+\textbf{Deterministic approach}\\
+For a deterministic method, a user directly or indirectly controls the sound's \textit{density}, using parameters like \textit{grain length} and \textit{grain interval}. Playing back grains with a regular interval creates a predictable and periodic output sound, which can even be used in a melodic way. The following code example implements a deterministic approach for a single stream of grains.
+\begin{lstlisting}[caption={A deterministic method of grain "seeding"}]
+	// User parameter input
+	float density = 0.5;
+	int grain_length = 100;
+	
+	// Calculate the interval with which grains are triggered
+	int interval = (float) grain_length / 0.5;
+	
+	// Iterate and trigger grains
+	for(int i = 0; i < block_size; i++) {
+		if(!(i % interval)) {
+			grains.push_back(new Grain {start: i});
+		}
+	}
+\end{lstlisting}
+
+\textbf{Stochastic implementation 1: using \lstinline|std::rand()|}\\
+To add variation to a sound, one might want to depart from a periodic triggering algorithm like the one described above. The cloud model, as mentioned in section 1.B, exchanges the regular interval for random chance. \\
+To give a user more control, a program implementing this method might provide an offset control that limits the rate at which new grains are created. \\
+
+
+\textbf{Stochastic implementation 2: using \lstinline|<random>|}\\
+For basic randomness, using \lstinline|std::rand()| will usually suffice. However, for more control over the stochastic process, one may choose to use a more sophisticated algorithm. The C++ Standard Library includes some alternative implementations that may be used in this scenario.\\
+
+\textbf{Stochastic implementation 3: using a Look-Up Table}\\
+On low-power devices, one might consider populating a table with noise beforehand, and embedding it into the program.\\ 
+
 \subsubsection{Windowing algorithms and approaches}
-Here I write about different approaches to windowing: look-up tables, real-time calculation, pre-calculation, etc.
-Note: Mutable Instruments uses LUTs, I want to use runtime calculation (insert tested efficiency of both)
+This section compares three approaches for implementing an envelope generator. For simplicity, each method renders a quadratic parabola envelope shape with a duration of 4096 samples.  \\
+
+\textbf{First implementation: Pre-rendering}\\
+This method calculates a new lookup table when any values (such as envelope or grain length) are changed. This way, the program can simply look up and apply the right value during the rendering process, without needing additional calculations.
+\begin{lstlisting}[caption={Envelope application using a pre-rendering algorithm}]
+	#define ENV_ROUNDS 4096
+		
+	float envelope[ENV_ROUNDS];
+	float intermediate_;
+		
+	// Initialization, runs once
+	for(int i = 0; i < ENV_ROUNDS; i++) {
+		intermediate_ = ENV_SHAPE * (float)(-1.0 * i * i + ENV_ROUNDS * i);
+		envelope[i] = (intermediate_ >= 1.0) * 1.0 + (intermediate_ < 1.0) * intermediate_;
+	}
+		
+	// Rendering loop, runs while active
+	for(int i = 0; i < ENV_ROUNDS; i++) {
+		test1[i] = sample[i] * envelope[i];
+	}
+\end{lstlisting}
+
+\textbf{Second implementation: Look-Up Table}\\
+In this next example, the program first scales its position in relation to the generated look-up table. Using this scaled position, it looks up the nearest corresponding value. It then uses a low pass filter to interpolate between the current and previous value.\\
+The following formula was used to generate the data for the look-up table:
+\[
+y_n(x_n) = \frac{0.001*((-x_n^2)+\textit{grain size}*x_n)}{\textit{grain size}}
+\]
+\[	
+f_n(y_n) = \frac{3}{2} * \begin{cases}
+	\frac{y_n^3}{3}  	& y_n < 1.0 \\
+	\frac{2}{3} 	& y_n \geq 1.0
+\end{cases}
+\]
+\begin{lstlisting}[caption={Envelope application using a look-up table}]
+	// Initialization, runs once
+	float ENVELOPE_LUT[6000] = {0, 0.00149975, 0.002998996, 0.004497737, ...};
+	
+	auto scale_factor = (sizeof(ENVELOPE_LUT) / sizeof(ENVELOPE_LUT[0])) / ENV_ROUNDS;
+	float previous = ENVELOPE_LUT[0];
+	int ptr = 0;
+	float tmp = 0.0;
+	
+	// Rendering loop, runs while active
+	for(int i = 0; i < ENV_ROUNDS; i++) {
+		ptr = floor(scale_factor * i);
+		
+		tmp = 0.5 * (envelope[ptr] + previous);
+		test2[i] = tmp * sample[i];
+		
+		previous = envelope[ptr];
+	}
+\end{lstlisting}
+
+\textbf{Third implementation: Real-Time Rendering}\\
+This last example is taken directly from the Argotlunar source code. It calculates a step and slope value, and uses these to increment the envelope's multiplication variable.
+
+\begin{lstlisting}[caption={Envelope application using real-time rendering}]
+	// Code by M. Ourednik
+	// Initialization, runs once
+	float env_amp = 0.0f;
+	float d = 1.0f / ENV_ROUNDS;
+	float d2 = d * d;
+	float slope = 4.0f * 0.8 * (d - d2);
+	float curve = -8.0f * 0.8 * d2;
+	
+	// Rendering loop, runs while active
+	for (int i = 0; i < ENV_ROUNDS; i++) {
+		env_amp += slope;
+		slope += curve;
+		test3[i] = sample[i] * env_amp;
+	}
+\end{lstlisting}
+
 
 \subsection{Efficiency}
-This subsection looks at variables that impact system performance, and how manufacturers handle those. Note that these benchmarks were ran on a 2019 MacBook Pro ().
+For this section, the implementations from above were ran multiple times, to gain an accurate result. The execution time of each loop iteration has been recorded, along with the initialization time. Note that these benchmarks were ran on a 2019 MacBook Pro (Intel Core i7 6-core processor, 16GB RAM).
+
+\subsubsection{Trigger algorithms}
+The first results describe the performance of the trigger algorithms proposed earlier. These implementations are compared not by execution time necessarily, but more so by adherence to a user's intention. For example, if a user turns the density knob, the resulting sound should reflect the desired changes.
+
+\subsubsection{Envelopes}
+Next, the benchmark results of the envelope implementations show some interesting details. Before looking at the runtime statistics, let's analyze the initialization times of each algorithm. Figure \ref{fig:env_init_time} shows this data, measured in nanoseconds.
+
+\begin{figure}[ht!]
+	\includegraphics[width=\linewidth]{env_init_time.png}
+	\caption{Initialization time, measured 100 times.}
+	\label{fig:env_init_time}
+\end{figure}
+
+Looking at this graph, one will notice that the pre-processing implementation takes significantly longer to initialize than its counterparts. This can be attributed to the way this method renders its data all at once during this initialization phase.\\
+The second graph, however, paints a different picture. Comparing the results in Figure \ref{fig:env_average_cycle_time}, both the pre-processing and real-time algorithm have an average render cycle time of around 42ns, while the look-up table method takes over 10ns longer.
+
+\begin{figure}[ht!]
+	\includegraphics[width=\linewidth]{env_average_cycle_time.png}
+	\caption{Average time per rendering cycle, measured 1000 times.}
+	\label{fig:env_average_cycle_time}
+\end{figure}
 
 \section{How is granular synthesis used?}
 This section looks at the human aspect of granular synthesis: what sounds does it produce, how is it controlled, and how can one play an instrument that uses this technique. KEEP THIS PART SHORT
