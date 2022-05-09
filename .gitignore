@@ -16,3 +16,8 @@ research/
 benchmark/_localrun
 benchmark/*/*.o
 .vscode/*
+benchmark/results/snapshot/*
+paper.out
+_minted-paper/default.pygstyle
+benchmark/1530941889.txt
+DivideDown.afdesign

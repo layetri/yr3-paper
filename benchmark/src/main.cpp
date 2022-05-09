@@ -6,15 +6,17 @@
 #include "scheduler.h"
 #include "benchmark.h"
 
-#define ROUNDS 1000
+#define ENV_RNDS 1000
+#define ROUNDS 100
 
 using namespace std;
 
 int main() {
+    srand(time(NULL));
     Benchmark benchmark;
 
     // Do Envelope benchmark
-    for(int i = 0; i < ROUNDS; i++) {
+    for(int i = 0; i < ENV_RNDS; i++) {
         Envelope::preprocess(i, &benchmark);
 
         Envelope::lookup(i, &benchmark);
@@ -22,14 +24,16 @@ int main() {
         Envelope::realtime(i, &benchmark);
     }
 
-    // // Do Scheduler benchmark
-    // for(int i = 0; i < ROUNDS; i++) {
-    //     Scheduler::deterministic(i, &benchmark);
-    // }
+    // Do Scheduler benchmark
+    for(int i = 0; i < ROUNDS; i++) {
+        Scheduler::deterministic(i, &benchmark);
 
-    // for(int i = 0; i < ROUNDS; i++) {
-    //     Scheduler::stochastic(i, &benchmark);
-    // }
+        Scheduler::stochastic(i, &benchmark);
+
+        Scheduler::stochastic2(i, &benchmark);
+
+        Scheduler::dividedown(i, &benchmark);
+    }
 
     benchmark.print();
 
